@@ -1,0 +1,11 @@
+invoke_chain("타이타닉")
+🚢💔🌊
+content='🚢💔🌊' response_metadata={'finish_reason': 'stop'} id='run-c6fecc75-4ca9-4c6f-bfd6-d01cefce3e3e-0'
+
+invoke_chain("오펜하이머")
+🔫🕵️‍♂️🔍
+content='🔫🕵️\u200d♂️🔍' response_metadata={'finish_reason': 'stop'} id='run-deabcb2e-2b7e-46ce-92fd-bab8be3a50f5-0'
+
+invoke_chain("인사이드아웃2")
+🧠💭🔁
+content='🧠💭🔁' response_metadata={'finish_reason': 'stop'} id='run-7dc73501-b211-4eda-ac6d-f70f1d56f3cc-0'
