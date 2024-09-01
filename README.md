@@ -7,3 +7,5 @@ langchain based gpt app service
 ## challenge-02 : FewShotChatMessagePromptTemplate
 
 ## challenge-03 : ConversationSummaryBufferMemory + RunnablePassthrough
+
+## challenge-04 : RAG Pipeline with a stuff document chain
