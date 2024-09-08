@@ -14,7 +14,11 @@ langchain based gpt & agent service
 
 ### challenge-05 : Document GPT with langchain & streamlit
 
+-   [demo] https://fullstack-gpt-document.streamlit.app
+
 ### challenge-06 : Quiz GPT with langchain & streamlit
+
+-   [demo] https://fullstack-gpt-quiz.streamlit.app
 
 ## how to run
 
@@ -66,7 +70,7 @@ llm = ChatOpenAI(
 
 ```
 $ python -m venv ./env
-$ source ./env/Scripts/activate or source env/bin/activate
+$ source env/Scripts/activate or source env/bin/activate
 $ vi main.py
 $ python main.py
 $ deactivate
@@ -76,7 +80,7 @@ $ deactivate
 
 ```
 $ python -m venv ./env
-$ source ./env/Scripts/activate or source env/bin/activate
+$ source env/Scripts/activate or source env/bin/activate
 $ touch main.ipynb
 ! select runtime kernel as venv - python 3.11.6
 ! run code & debug for testing
