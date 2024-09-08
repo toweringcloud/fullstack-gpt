@@ -14,6 +14,8 @@ langchain based gpt & agent service
 
 ### challenge-05 : Document GPT with langchain & streamlit
 
+### challenge-06 : Quiz GPT with langchain & streamlit
+
 ## how to run
 
 ### setup
