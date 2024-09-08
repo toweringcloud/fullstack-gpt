@@ -12,6 +12,8 @@ langchain based gpt & agent service
 
 ### challenge-04 : RAG Pipeline with a stuff document chain
 
+### challenge-05 : Document GPT with langchain & streamlit
+
 ## how to run
 
 ### setup
@@ -77,4 +79,14 @@ $ touch main.ipynb
 ! select runtime kernel as venv - python 3.11.6
 ! run code & debug for testing
 $ deactivate
+```
+
+-   run streamlit app in root environment
+
+```
+$ streamlit run challenge-06.py
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
 ```
