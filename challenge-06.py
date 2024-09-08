@@ -148,19 +148,19 @@ with st.sidebar:
 
     # Quiz Level 선택
     st.markdown("---")
-    level = st.selectbox("Quiz Level", ("EASY", "HRAD"))
+    level = st.selectbox("Quiz Level", ("Easy", "Medium", "Hard"))
 
-    # Gihub Repo Link
-    # st.markdown("---")
-    # st.write("Github: https://github.com/toweringcloud/fullstack-gpt")
+    # Github Repo Link
+    st.markdown("---")
+    st.write("[Github] https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-06.py")
 
 
 if not docs:
     st.markdown(
-        """
-    Welcome to QuizGPT.
-    I will make a quiz from Wikipedia or your own file to test your knowledge and help you study.               
-    Get started by uploading a file or searching on Wikipedia in the sidebar.
+    """
+        Welcome to QuizGPT.
+        I will make a quiz from Wikipedia or your own file to test your knowledge and help you study.               
+        Get started by uploading a file or searching on Wikipedia in the sidebar.
     """
     )
 else:
