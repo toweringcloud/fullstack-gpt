@@ -14,17 +14,17 @@ langchain based gpt & agent service
 
 ### challenge-05 : Document GPT with langchain & streamlit
 
--   [demo] https://fullstack-gpt-document.streamlit.app
+- [demo] https://fullstack-gpt-document.streamlit.app
 
-### challenge-06 : Quiz GPT with langchain & streamlit
+### challenge-06 : Quiz GPT with function calling
 
--   [demo] https://fullstack-gpt-quiz.streamlit.app
+- [demo] https://fullstack-gpt-quiz.streamlit.app
 
 ## how to run
 
 ### setup
 
--   install python 3.11.6 and add system path on python & pip
+- install python 3.11.6 and add system path on python & pip
 
 ```
 $ python --version
@@ -35,7 +35,7 @@ pip 23.2.1 from D:\setup\Python311\Lib\site-packages\pip (python 3.11)
 
 ```
 
--   install required packages
+- install required packages
 
 ```
 $ pip install -r requirements.txt
@@ -43,14 +43,14 @@ $ pip install -r requirements.txt
 
 ### config
 
--   set runtime environment
+- set runtime environment
 
 ```
-$ cat ./env
+$ cat .env
 OPENAI_API_KEY="..."
 ```
 
--   load runtime environment
+- load runtime environment
 
 ```
 from dotenv import dotenv_values
@@ -66,7 +66,7 @@ llm = ChatOpenAI(
 
 ### launch
 
--   run normal app in virtual environment
+- run normal app in virtual environment
 
 ```
 $ python -m venv ./env
@@ -76,10 +76,9 @@ $ python main.py
 $ deactivate
 ```
 
--   run jupyter app in virtual environment
+- run jupyter app in virtual environment
 
 ```
-$ python -m venv ./env
 $ source env/Scripts/activate or source env/bin/activate
 $ touch main.ipynb
 ! select runtime kernel as venv - python 3.11.6
@@ -87,7 +86,7 @@ $ touch main.ipynb
 $ deactivate
 ```
 
--   run streamlit app in root environment
+- run streamlit app in root environment
 
 ```
 $ streamlit run challenge-06.py

@@ -159,7 +159,7 @@ if not docs:
     st.markdown(
     """
         Welcome to QuizGPT.
-        I will make a quiz from Wikipedia or your own file to test your knowledge and help you study.               
+        I will make a quiz from Wikipedia or your own file to test your knowledge.               
         Get started by uploading a file or searching on Wikipedia in the sidebar.
     """
     )
