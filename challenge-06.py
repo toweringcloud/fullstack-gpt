@@ -14,7 +14,6 @@ st.set_page_config(
     page_title="::: Quiz GPT :::",
     page_icon="🧐",
 )
-
 st.title("Quiz GPT")
 
 
@@ -158,11 +157,14 @@ with st.sidebar:
 if not docs:
     st.markdown(
     """
-        Welcome to QuizGPT.
-        I will make a quiz from Wikipedia or your own file to test your knowledge.               
+        Welcome to Quiz GPT.
+
+        I will make a quiz from Wikipedia or your own file to test your knowledge.
+
         Get started by uploading a file or searching on Wikipedia in the sidebar.
     """
     )
+
 else:
     if not openai_api_key:
         st.error("Please input your OpenAI API Key on the sidebar")
@@ -205,6 +207,7 @@ else:
                     success_count += 1
                 elif value is not None:
                     st.error("Wrong!")
+
             if question_count == success_count:
                 st.balloons()
 

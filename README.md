@@ -10,15 +10,20 @@ langchain based gpt & agent service
 
 ### challenge-03 : ConversationSummaryBufferMemory + RunnablePassthrough
 
-### challenge-04 : RAG Pipeline with a stuff document chain
+### challenge-04 : RAG pipeline with a stuff document chain
 
-### challenge-05 : Document GPT with langchain & streamlit
+### challenge-05 : Document GPT with streamlit app + RunnableLambda
 
 - [demo] https://fullstack-gpt-document.streamlit.app
 
-### challenge-06 : Quiz GPT with function calling
+### challenge-06 : Quiz GPT with custom function calling
 
 - [demo] https://fullstack-gpt-quiz.streamlit.app
+
+### challenge-07 : Site GPT with map re-rank chain
+
+- [demo] https://fullstack-gpt-site.streamlit.app
+  -> Cloudflare Official Site : AI Gateway, Vectorize, Workers AI
 
 ## how to run
 
@@ -95,3 +100,24 @@ $ streamlit run challenge-06.py
 
   Local URL: http://localhost:8501
 ```
+
+### test with headless browser
+
+$ source env/Scripts/activate or source env/bin/activate
+$ playwright install
+Downloading Chromium 119.0.6045.9 (playwright build v1084) from https://playwright.azureedge.net/builds/chromium/1084/chromium-win64.zip
+...
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 120.8 Mb
+Chromium 119.0.6045.9 (playwright build v1084) downloaded to C:\Users\iscreamarts\AppData\Local\ms-playwright\chromium-1084
+Downloading FFMPEG playwright build v1009 from https://playwright.azureedge.net/builds/ffmpeg/1009/ffmpeg-win64.zip
+...
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 1.4 Mb
+FFMPEG playwright build v1009 downloaded to C:\Users\iscreamarts\AppData\Local\ms-playwright\ffmpeg-1009
+Downloading Firefox 118.0.1 (playwright build v1425) from https://playwright.azureedge.net/builds/firefox/1425/firefox-win64.zip
+...
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 80 Mb
+Firefox 118.0.1 (playwright build v1425) downloaded to C:\Users\iscreamarts\AppData\Local\ms-playwright\firefox-1425
+Downloading Webkit 17.4 (playwright build v1921) from https://playwright.azureedge.net/builds/webkit/1921/webkit-win64.zip
+...
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 44.5 Mb
+Webkit 17.4 (playwright build v1921) downloaded to C:\Users\iscreamarts\AppData\Local\ms-playwright\webkit-1921
