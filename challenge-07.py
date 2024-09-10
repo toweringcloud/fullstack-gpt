@@ -169,6 +169,10 @@ with st.sidebar:
         placeholder="https://developers.cloudflare.com/sitemap-0.xml",
     )
 
+    # Github Repo Link
+    st.markdown("---")
+    st.write("[Github] https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-07.py")
+
 
 st.markdown(
 """
@@ -216,3 +220,6 @@ if sitemap_url:
             )
             result = chain.invoke(query)
             st.markdown(result.content.replace("$", "\$"))
+
+# reference site
+# https://github.com/magio-hercules/fullstack-gpt
