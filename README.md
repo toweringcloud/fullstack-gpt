@@ -14,22 +14,22 @@ langchain based gpt & agent service
 
 ### challenge-05 : Document GPT with streamlit app + RunnableLambda
 
-- [demo] https://fullstack-gpt-document.streamlit.app
+-   [demo] https://fullstack-gpt-document.streamlit.app
 
 ### challenge-06 : Quiz GPT with custom function calling
 
-- [demo] https://fullstack-gpt-quiz.streamlit.app
+-   [demo] https://fullstack-gpt-quiz.streamlit.app
 
 ### challenge-07 : Site GPT with map re-rank chain
 
-- [demo] https://fullstack-gpt-site.streamlit.app
-  -> Cloudflare Official Site : AI Gateway, Vectorize, Workers AI
+-   [demo] https://fullstack-gpt-site.streamlit.app
+    -> Cloudflare Official Site : AI Gateway, Vectorize, Workers AI
 
 ## how to run
 
 ### setup
 
-- install python 3.11.6 and add system path on python & pip
+-   install python 3.11.6 and add system path on python & pip
 
 ```
 $ python --version
@@ -40,7 +40,7 @@ pip 23.2.1 from D:\setup\Python311\Lib\site-packages\pip (python 3.11)
 
 ```
 
-- install required packages
+-   install required packages
 
 ```
 $ pip install -r requirements.txt
@@ -48,14 +48,14 @@ $ pip install -r requirements.txt
 
 ### config
 
-- set runtime environment
+-   set runtime environment
 
 ```
 $ cat .env
 OPENAI_API_KEY="..."
 ```
 
-- load runtime environment
+-   load runtime environment
 
 ```
 from dotenv import dotenv_values
@@ -71,7 +71,7 @@ llm = ChatOpenAI(
 
 ### launch
 
-- run normal app in virtual environment
+-   run normal app in virtual environment
 
 ```
 $ python -m venv ./env
@@ -81,7 +81,7 @@ $ python main.py
 $ deactivate
 ```
 
-- run jupyter app in virtual environment
+-   run jupyter app in virtual environment
 
 ```
 $ source env/Scripts/activate or source env/bin/activate
@@ -91,7 +91,7 @@ $ touch main.ipynb
 $ deactivate
 ```
 
-- run streamlit app in root environment
+-   run streamlit app in root environment
 
 ```
 $ streamlit run challenge-06.py
@@ -109,17 +109,20 @@ $ playwright install
 Downloading Chromium 119.0.6045.9 (playwright build v1084) from https://playwright.azureedge.net/builds/chromium/1084/chromium-win64.zip
 ...
 |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 120.8 Mb
-Chromium 119.0.6045.9 (playwright build v1084) downloaded to C:\Users\iscreamarts\AppData\Local\ms-playwright\chromium-1084
+Chromium 119.0.6045.9 (playwright build v1084) downloaded to ...
+
 Downloading FFMPEG playwright build v1009 from https://playwright.azureedge.net/builds/ffmpeg/1009/ffmpeg-win64.zip
 ...
 |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 1.4 Mb
-FFMPEG playwright build v1009 downloaded to C:\Users\iscreamarts\AppData\Local\ms-playwright\ffmpeg-1009
+FFMPEG playwright build v1009 downloaded to ...
+
 Downloading Firefox 118.0.1 (playwright build v1425) from https://playwright.azureedge.net/builds/firefox/1425/firefox-win64.zip
 ...
 |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 80 Mb
-Firefox 118.0.1 (playwright build v1425) downloaded to C:\Users\iscreamarts\AppData\Local\ms-playwright\firefox-1425
+Firefox 118.0.1 (playwright build v1425) downloaded to ...
+
 Downloading Webkit 17.4 (playwright build v1921) from https://playwright.azureedge.net/builds/webkit/1921/webkit-win64.zip
 ...
 |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 44.5 Mb
-Webkit 17.4 (playwright build v1921) downloaded to C:\Users\iscreamarts\AppData\Local\ms-playwright\webkit-1921
+Webkit 17.4 (playwright build v1921) downloaded to ...
 ```

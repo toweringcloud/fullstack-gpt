@@ -3,11 +3,14 @@ import streamlit as st
 from langchain.chat_models import ChatOpenAI
 from langchain.callbacks import StreamingStdOutCallbackHandler
 from langchain.document_loaders import SitemapLoader
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings import CacheBackedEmbeddings, OpenAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
+from langchain.storage import LocalFileStore
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
+from pathlib import Path
+from urllib.parse import urlparse
 
 
 st.set_page_config(
@@ -26,17 +29,17 @@ answers_prompt = ChatPromptTemplate.from_template(
     Make sure to always include the answer's score even if it's 0.
 
     Context: {context}
-                                                  
+
     Examples:
-                                                  
+
     Question: How far away is the moon?
     Answer: The moon is 384,400 km away.
     Score: 5
-                                                  
+                                  
     Question: How far away is the sun?
     Answer: I don't know
     Score: 0
-                                                  
+
     Your turn!
 
     Question: {question}
@@ -110,7 +113,6 @@ def parse_page(soup):
         str(soup.get_text())
         .replace("\n", " ")
         .replace("\xa0", " ")
-        # .replace("CloseSearch Submit Blog", "")
     )
 
 
@@ -123,25 +125,32 @@ def load_website(url):
     loader = SitemapLoader(
         url,
         filter_urls=[
-            # r"^(.*\/products\/|.*\/case-studies\/).*",
-            r"^(.*\/products\/|.*\/learning\/).*",
+            r"^(.*\/ai-gateway\/).*",
+            r"^(.*\/vectorize\/).*",
+            r"^(.*\/workers-ai\/).*"
         ],
         parsing_function=parse_page,
+        continue_on_failure=True,
         # blocksize=16380,
-        continue_on_failure=True
     )
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
+
+    dir_path = f"./.cache/embeddings/{urlparse(url).netloc}"
+    Path(dir_path).mkdir(parents=True, exist_ok=True)
+    cache_dir = LocalFileStore(dir_path)
+
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    vector_store = FAISS.from_documents(docs, embeddings)
-    return vector_store.as_retriever()
+    cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
+    vectorstore = FAISS.from_documents(docs, cached_embeddings)
+    return vectorstore.as_retriever()
 
 
 with st.sidebar:
     docs = None
 
     # API Key 입력
-    openai_api_key = st.text_input("Input your OpenAI API Key")
+    openai_api_key = st.text_input("Input your OpenAI API Key", type="password")
 
     # AI Model 선택
     st.markdown("---")
@@ -157,7 +166,7 @@ with st.sidebar:
     st.markdown("---")
     sitemap_url = st.text_input(
         "Write down a SiteMap URL",
-        placeholder="https://example.com",
+        placeholder="https://developers.cloudflare.com/sitemap-0.xml",
     )
 
 
@@ -178,10 +187,10 @@ else:
         openai_api_key=openai_api_key,
         model=selected_model,
         temperature=0.1,
-        streaming=True,
-        callbacks=[
-            StreamingStdOutCallbackHandler(),
-        ],
+        # streaming=True,
+        # callbacks=[
+        #     StreamingStdOutCallbackHandler(),
+        # ],
     )
 
 if sitemap_url:
@@ -191,22 +200,7 @@ if sitemap_url:
     else:
         # web.Application(handler_args={'max_field_size': 16380})
         # ClientResponseError: 400, message='Got more than 8190 bytes (12827) when reading Header value is too long.', url=URL('https://www.cloudflare.com/application-services/products/cloudflare-spectrum/')
-        '''
-            Fetching pages:   2%|1         | 39/1961 [00:03<02:34, 12.47it/s]Error fetching https://www.cloudflare.com/products/stream-delivery/, skipping due to continue_on_failure=True
-            Fetching pages:   3%|2         | 53/1961 [00:04<02:27, 12.96it/s]Error fetching https://www.cloudflare.com/ecommerce/, skipping due to continue_on_failure=True
-            Fetching pages:   3%|3         | 67/1961 [00:05<02:26, 12.96it/s]Error fetching https://www.cloudflare.com/performance/, skipping due to continue_on_failure=True
-            Fetching pages:  20%|#9        | 383/1961 [00:58<04:19,  6.09it/s]Error fetching https://www.cloudflare.com/plans/pro/, skipping due to continue_on_failure=True
-            Fetching pages:  22%|##1       | 424/1961 [01:08<06:43,  3.81it/s]Error fetching https://www.cloudflare.com/what-is-cloudflare/, skipping due to continue_on_failure=True
-            Fetching pages:  40%|####      | 789/1961 [02:29<04:35,  4.26it/s]Error fetching https://www.cloudflare.com/partners/threat-intelligence/, skipping due to continue_on_failure=True
-            Fetching pages:  70%|######9   | 1365/1961 [03:15<00:15, 37.74it/s]Error fetching https://www.cloudflare.com/case-studies/luana-savings-bank/, skipping due to continue_on_failure=True
-            Fetching pages:  91%|#########1| 1794/1961 [06:02<01:30,  1.85it/s]Error fetching https://www.cloudflare.com/press-releases/2023/cloudflare-partners-with-databricks/, skipping due to continue_on_failure=True
-            Fetching pages:  97%|#########6| 1894/1961 [06:57<00:34,  1.93it/s]Error fetching https://www.cloudflare.com/press-releases/2020/cloudflare-announces-date-of-third-quarter-2020-financial-results/, skipping due to continue_on_failure=True
-            Fetching pages: 100%|##########| 1961/1961 [07:27<00:00,  4.39it/s]
-            Retrying langchain.embeddings.openai.embed_with_retry.<locals>._embed_with_retry in 4.0 seconds as it raised RateLimitError: Rate limit reached for text-embedding-ada-002 in organization org-UvVnVP4ROYREanHJyUM7wz4O on tokens per min (TPM): Limit 1000000, Used 735993, Requested 747646. Please try again in 29.018s. Visit https://platform.openai.com/account/rate-limits to learn more..
-
-            Fetching pages:  89%|########9 | 367/412 [02:00<00:14,  3.13it/s]Error fetching https://www.cloudflare.com/case-studies/okcupid/, skipping due to continue_on_failure=True
-            Fetching pages: 100%|##########| 412/412 [02:17<00:00,  2.99it/s]
-        '''
+        # Retrying langchain.embeddings.openai.embed_with_retry.<locals>._embed_with_retry in 4.0 seconds as it raised RateLimitError: Rate limit reached for text-embedding-ada-002 in organization org-UvVnVP4ROYREanHJyUM7wz4O on tokens per min (TPM): Limit 1000000, Used 735993, Requested 747646. Please try again in 29.018s. Visit https://platform.openai.com/account/rate-limits to learn more..
         retriever = load_website(sitemap_url)
 
         st.divider()

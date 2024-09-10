@@ -1,0 +1,8 @@
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = true
+
+[server]
+enableStaticServing = true
