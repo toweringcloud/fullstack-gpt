@@ -103,6 +103,7 @@ $ streamlit run challenge-06.py
 
 ### test with headless browser
 
+```
 $ source env/Scripts/activate or source env/bin/activate
 $ playwright install
 Downloading Chromium 119.0.6045.9 (playwright build v1084) from https://playwright.azureedge.net/builds/chromium/1084/chromium-win64.zip
@@ -121,3 +122,4 @@ Downloading Webkit 17.4 (playwright build v1921) from https://playwright.azureed
 ...
 |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 44.5 Mb
 Webkit 17.4 (playwright build v1921) downloaded to C:\Users\iscreamarts\AppData\Local\ms-playwright\webkit-1921
+```

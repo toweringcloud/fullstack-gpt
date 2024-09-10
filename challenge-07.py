@@ -122,11 +122,13 @@ def load_website(url):
     )
     loader = SitemapLoader(
         url,
-        # filter_urls=[
-        #     r"^(.*\/products\/).*",
-        # ],
+        filter_urls=[
+            # r"^(.*\/products\/|.*\/case-studies\/).*",
+            r"^(.*\/products\/|.*\/learning\/).*",
+        ],
         parsing_function=parse_page,
-        blocksize=16380
+        # blocksize=16380,
+        continue_on_failure=True
     )
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
@@ -187,10 +189,27 @@ if sitemap_url:
         with st.sidebar:
             st.error("Please write down a Sitemap URL.")
     else:
+        # web.Application(handler_args={'max_field_size': 16380})
         # ClientResponseError: 400, message='Got more than 8190 bytes (12827) when reading Header value is too long.', url=URL('https://www.cloudflare.com/application-services/products/cloudflare-spectrum/')
+        '''
+            Fetching pages:   2%|1         | 39/1961 [00:03<02:34, 12.47it/s]Error fetching https://www.cloudflare.com/products/stream-delivery/, skipping due to continue_on_failure=True
+            Fetching pages:   3%|2         | 53/1961 [00:04<02:27, 12.96it/s]Error fetching https://www.cloudflare.com/ecommerce/, skipping due to continue_on_failure=True
+            Fetching pages:   3%|3         | 67/1961 [00:05<02:26, 12.96it/s]Error fetching https://www.cloudflare.com/performance/, skipping due to continue_on_failure=True
+            Fetching pages:  20%|#9        | 383/1961 [00:58<04:19,  6.09it/s]Error fetching https://www.cloudflare.com/plans/pro/, skipping due to continue_on_failure=True
+            Fetching pages:  22%|##1       | 424/1961 [01:08<06:43,  3.81it/s]Error fetching https://www.cloudflare.com/what-is-cloudflare/, skipping due to continue_on_failure=True
+            Fetching pages:  40%|####      | 789/1961 [02:29<04:35,  4.26it/s]Error fetching https://www.cloudflare.com/partners/threat-intelligence/, skipping due to continue_on_failure=True
+            Fetching pages:  70%|######9   | 1365/1961 [03:15<00:15, 37.74it/s]Error fetching https://www.cloudflare.com/case-studies/luana-savings-bank/, skipping due to continue_on_failure=True
+            Fetching pages:  91%|#########1| 1794/1961 [06:02<01:30,  1.85it/s]Error fetching https://www.cloudflare.com/press-releases/2023/cloudflare-partners-with-databricks/, skipping due to continue_on_failure=True
+            Fetching pages:  97%|#########6| 1894/1961 [06:57<00:34,  1.93it/s]Error fetching https://www.cloudflare.com/press-releases/2020/cloudflare-announces-date-of-third-quarter-2020-financial-results/, skipping due to continue_on_failure=True
+            Fetching pages: 100%|##########| 1961/1961 [07:27<00:00,  4.39it/s]
+            Retrying langchain.embeddings.openai.embed_with_retry.<locals>._embed_with_retry in 4.0 seconds as it raised RateLimitError: Rate limit reached for text-embedding-ada-002 in organization org-UvVnVP4ROYREanHJyUM7wz4O on tokens per min (TPM): Limit 1000000, Used 735993, Requested 747646. Please try again in 29.018s. Visit https://platform.openai.com/account/rate-limits to learn more..
+
+            Fetching pages:  89%|########9 | 367/412 [02:00<00:14,  3.13it/s]Error fetching https://www.cloudflare.com/case-studies/okcupid/, skipping due to continue_on_failure=True
+            Fetching pages: 100%|##########| 412/412 [02:17<00:00,  2.99it/s]
+        '''
         retriever = load_website(sitemap_url)
 
-        st.markdown("---")
+        st.divider()
         query = st.text_input("Ask a question to the website.")
         if query:
             chain = (

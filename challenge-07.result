@@ -1,0 +1,15 @@
+[Q] llama-2-7b-chat-fp16 모델의 1M 입력 토큰당 가격은 얼마인가요?
+    What is the price per 1M input token for llama-2-7b-chat-fp16 model?
+[A] I don't know
+- Source: https://www.cloudflare.com/case-studies/lendingtree/
+- Date: 2024-07-25T18:44:53.999Z
+
+[Q] Cloudflare의 AI Gateway로 무엇을 할 수 있나요?
+    What can you do with Cloudflare's AI Gateway?
+[A] Cloudflare의 API Gateway를 사용하면 API 엔드포인트를 자동으로 발견하고 보호하며 모니터링할 수 있습니다. 또한 OWASP Top 10 API 보안 위험을 차단하고, API 트래픽을 정리하여 호스팅 비용을 줄일 수 있습니다. 이 서비스는 API 엔드포인트를 관리하고 공격, 취약점 악용 및 데이터 유출을 차단하는 데 도움을 줍니다.
+- Source: https://www.cloudflare.com/application-services/products/api-gateway/
+- Date: 2024-09-07T07:16:23.002Z
+
+[Q] 벡터라이즈에서 단일 계정은 몇 개의 인덱스를 가질 수 있나요?
+    How many indexes can a single account have in Vectorize?
+[A]
