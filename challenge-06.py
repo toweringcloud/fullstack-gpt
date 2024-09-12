@@ -110,7 +110,10 @@ with st.sidebar:
     topic = None
 
     # API Key 입력
-    openai_api_key = st.text_input("Input your OpenAI API Key")
+    openai_api_key = st.text_input(
+        "Input your OpenAI API Key",
+        type="password"
+    )
 
     # AI Model 선택
     st.markdown("---")

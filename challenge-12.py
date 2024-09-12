@@ -116,7 +116,10 @@ def embed_file(file_path):
 
 with st.sidebar:
     # API Key 입력
-    openai_api_key = st.text_input("Input your OpenAI API Key", type="password")
+    openai_api_key = st.text_input(
+        "Input your OpenAI API Key",
+        type="password"
+    )
 
     # AI Model 선택
     st.markdown("---")

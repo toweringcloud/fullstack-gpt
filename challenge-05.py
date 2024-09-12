@@ -33,7 +33,10 @@ st.divider()
 
 with st.sidebar:
     # API Key 입력
-    openai_api_key = st.text_input("Input your OpenAI API Key")
+    openai_api_key = st.text_input(
+        "Input your OpenAI API Key",
+        type="password"
+    )
 
     # Model 선택
     st.markdown("---")
