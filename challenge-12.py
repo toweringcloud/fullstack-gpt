@@ -28,7 +28,7 @@ st.markdown(
 """
     Welcome to Meeting GPT!
 
-    Upload a video and I will give you a transcript, a summary and a chat bot to ask any questions about it.
+    Upload a video and I will give you a transcript, a summary and a chatbot to ask any questions about it.
 
     Get started by uploading a video file in the sidebar.
 """
@@ -122,7 +122,6 @@ with st.sidebar:
     )
 
     # AI Model 선택
-    st.markdown("---")
     selected_model = st.selectbox(
         "Choose your AI Model",
         (
@@ -132,7 +131,6 @@ with st.sidebar:
     )
 
     # Video 파일 업로드
-    st.markdown("---")
     video_source = st.file_uploader(
         "Upload your Video file",
         type=["mp4", "avi", "mkv", "mov"],
@@ -140,8 +138,9 @@ with st.sidebar:
 
     # Github Repo Link
     st.markdown("---")
-    st.write("[Github] https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-12.py")
-
+    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-12.py"
+    badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
+    st.write(f"[![Repo]({badge_link})]({github_link})")
 
 if not openai_api_key:
     st.error("Please input your OpenAI API Key on the sidebar")

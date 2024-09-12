@@ -20,9 +20,9 @@ st.title("Document GPT")
 
 st.markdown(
 """
-Welcome!
+Welcome to Document GPT!
             
-Use this chatbot to ask questions to an AI about your files!
+Use this chatbot to ask questions to an AI about your files.
 
 1. Input your OpenAI API Key on the sidebar
 2. Upload your file on the sidebar.
@@ -39,7 +39,6 @@ with st.sidebar:
     )
 
     # Model 선택
-    st.markdown("---")
     selected_model = st.selectbox(
         "Choose your AI Model",
         (
@@ -49,7 +48,6 @@ with st.sidebar:
     )
 
     # File 선택
-    st.markdown("---")
     file = st.file_uploader(
         "Upload a. txt .pdf or .docx file",
         type=["pdf", "txt", "docx"],
@@ -57,7 +55,9 @@ with st.sidebar:
 
     # Github Repo Link
     st.markdown("---")
-    st.write("[Github] https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-05.py")
+    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-05.py"
+    badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
+    st.write(f"[![Repo]({badge_link})]({github_link})")
 
 
 class ChatCallbackHandler(BaseCallbackHandler):

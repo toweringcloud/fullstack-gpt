@@ -116,7 +116,6 @@ with st.sidebar:
     )
 
     # AI Model 선택
-    st.markdown("---")
     selected_model = st.selectbox(
         "Choose your AI Model",
         (
@@ -126,11 +125,10 @@ with st.sidebar:
     )
 
     # Quiz Target 선택 (Wiki or Custom File)
-    st.markdown("---")
     quiz_target = st.selectbox(
         "Choose what you want to use",
         (
-            "File",
+            "Your Document File",
             "Wikipedia Article",
         ),
     )
@@ -149,18 +147,19 @@ with st.sidebar:
             docs = wiki_search(topic)
 
     # Quiz Level 선택
-    st.markdown("---")
     level = st.selectbox("Quiz Level", ("Easy", "Medium", "Hard"))
 
     # Github Repo Link
     st.markdown("---")
-    st.write("[Github] https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-06.py")
+    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-06.py"
+    badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
+    st.write(f"[![Repo]({badge_link})]({github_link})")
 
 
 if not docs:
     st.markdown(
     """
-        Welcome to Quiz GPT.
+        Welcome to Quiz GPT!
 
         I will make a quiz from Wikipedia or your own file to test your knowledge.
 

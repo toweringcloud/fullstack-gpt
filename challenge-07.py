@@ -127,11 +127,15 @@ def load_website(url):
         filter_urls=[
             r"^(.*\/ai-gateway\/).*",
             r"^(.*\/vectorize\/).*",
-            r"^(.*\/workers-ai\/).*"
+            r"^(.*\/workers-ai\/).*",
+            r"^(.*\/smart-glasses\/).*",
         ],
         parsing_function=parse_page,
         continue_on_failure=True,
-        # blocksize=16380,
+    ) if "cloudflare" or "meta" in sitemap_url else SitemapLoader(
+        url,
+        parsing_function=parse_page,
+        continue_on_failure=True
     )
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
@@ -156,7 +160,6 @@ with st.sidebar:
     )
 
     # AI Model 선택
-    st.markdown("---")
     selected_model = st.selectbox(
         "Choose your AI Model",
         (
@@ -166,20 +169,31 @@ with st.sidebar:
     )
 
     # SiteMap URL 입력
-    st.markdown("---")
     sitemap_url = st.text_input(
         "Write down a SiteMap URL",
         placeholder="https://developers.cloudflare.com/sitemap-0.xml",
     )
 
+    # SiteMap 선택
+    selected_url = st.selectbox(
+        "Choose a SiteMap",
+        (
+            "cloudflare",
+            "flutter",
+            "meta"
+        )
+    )
+
     # Github Repo Link
     st.markdown("---")
-    st.write("[Github] https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-07.py")
+    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-07.py"
+    badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
+    st.write(f"[![Repo]({badge_link})]({github_link})")
 
 
 st.markdown(
 """
-    Welcome to Site GPT.
+    Welcome to Site GPT!
 
     Ask questions about the content of a website.
 
@@ -199,6 +213,14 @@ else:
         #     StreamingStdOutCallbackHandler(),
         # ],
     )
+
+if selected_url:
+    if selected_url == "cloudflare":
+        sitemap_url = "https://developers.cloudflare.com/sitemap-0.xml"
+    elif selected_url == "flutter":
+        sitemap_url = "https://docs.flutter.dev/sitemap.xml"
+    elif selected_url == "meta":
+        sitemap_url = "https://www.meta.com/sitemap.xml"
 
 if sitemap_url:
     if ".xml" not in sitemap_url:

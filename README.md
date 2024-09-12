@@ -14,19 +14,19 @@ langchain based gpt & agent service
 
 ### challenge-05 : Document GPT with streamlit app + RunnableLambda
 
--   [demo] https://fullstack-gpt-document.streamlit.app
+- [demo] https://fullstack-gpt-document.streamlit.app
 
 ### challenge-06 : Quiz GPT with custom function calling
 
--   [demo] https://fullstack-gpt-quiz.streamlit.app
+- [demo] https://fullstack-gpt-quiz.streamlit.app
 
 ### challenge-07 : Site GPT with map re-rank chain
 
--   [demo] https://fullstack-gpt-site.streamlit.app
+- [demo] https://fullstack-gpt-site.streamlit.app
 
 ### challenge-08 : Research Agent with wikipedia or duckduckgo
 
-### challenge-09 : Research Assistant with Assistant API (TBD)
+### challenge-09 : Research Assistant with agent + thread + run
 
 ### challenge-10 : Multiple Research Agents with Crew AI (TBD)
 
@@ -34,7 +34,7 @@ langchain based gpt & agent service
 
 ### challenge-12 : Meeting GPT with refined chain
 
--   [demo] https://fullstack-gpt-meeting.streamlit.app
+- [demo] https://fullstack-gpt-meeting.streamlit.app
 
 ### challenge-13 : Chef GPT for custom ChatGTPs action (TBD)
 
@@ -42,7 +42,7 @@ langchain based gpt & agent service
 
 ### setup
 
--   install python 3.11.6 and add system path on python & pip
+- install python 3.11.6 and add system path on python & pip
 
 ```
 $ python --version
@@ -53,7 +53,7 @@ pip 23.2.1 from D:\setup\Python311\Lib\site-packages\pip (python 3.11)
 
 ```
 
--   install required packages
+- install required packages
 
 ```
 $ pip install -r requirements.txt
@@ -61,14 +61,14 @@ $ pip install -r requirements.txt
 
 ### config
 
--   set runtime environment
+- set runtime environment
 
 ```
 $ cat .env
 OPENAI_API_KEY="..."
 ```
 
--   load runtime environment
+- load runtime environment
 
 ```
 from dotenv import dotenv_values
@@ -84,7 +84,7 @@ llm = ChatOpenAI(
 
 ### launch
 
--   run normal app in virtual environment
+- run normal app in virtual environment
 
 ```
 $ python -m venv ./env
@@ -94,7 +94,7 @@ $ python main.py
 $ deactivate
 ```
 
--   run jupyter app in virtual environment
+- run jupyter app in virtual environment
 
 ```
 $ source env/Scripts/activate or source env/bin/activate
@@ -104,7 +104,7 @@ $ touch main.ipynb
 $ deactivate
 ```
 
--   run streamlit app in root environment
+- run streamlit app in root environment
 
 ```
 $ streamlit run challenge-06.py
