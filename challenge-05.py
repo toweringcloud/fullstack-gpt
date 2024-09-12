@@ -36,20 +36,25 @@ with st.sidebar:
     openai_api_key = st.text_input("Input your OpenAI API Key")
 
     # Model 선택
+    st.markdown("---")
     selected_model = st.selectbox(
         "Choose your AI Model",
         (
             "gpt-3.5-turbo",
             "gpt-4o-mini",
-            "gpt-4o-mini-2024-07-18"
         )
     )
 
     # File 선택
+    st.markdown("---")
     file = st.file_uploader(
         "Upload a. txt .pdf or .docx file",
         type=["pdf", "txt", "docx"],
     )
+
+    # Github Repo Link
+    st.markdown("---")
+    st.write("[Github] https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-05.py")
 
 
 class ChatCallbackHandler(BaseCallbackHandler):
