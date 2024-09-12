@@ -5,4 +5,4 @@ gatherUsageStats = false
 showErrorDetails = true
 
 [server]
-enableStaticServing = true
+enableStaticServing = false

@@ -163,3 +163,4 @@ cython_debug/
 
 requirements_*.txt
 Test.py
+files/sample*

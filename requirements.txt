@@ -170,6 +170,7 @@ python-magic==0.4.27
 python-multipart==0.0.6
 python-pptx==0.6.21
 pytube==11.0.2
+pytubefix==6.15.4
 pytz==2023.3.post1
 pytz-deprecation-shim==0.1.0.post0
 PyYAML==6.0.1

@@ -27,6 +27,16 @@ langchain based gpt & agent service
 
 ### challenge-08 : Research Agent with wikipedia or duckduckgo
 
+### challenge-09 : Advanced Research Agent with Assistant API (TBD)
+
+### challenge-10 : Multiple Research Agents with Crew AI (TBD)
+
+### challenge-11 : Private GPT with Ollama LLM (TBD)
+
+### challenge-12 : Meeting GPT with refined chain
+
+### challenge-13 : Chef GPT for custom ChatGTPs action (TBD)
+
 ## how to run
 
 ### setup
@@ -97,9 +107,7 @@ $ deactivate
 
 ```
 $ streamlit run challenge-06.py
-
   You can now view your Streamlit app in your browser.
-
   Local URL: http://localhost:8501
 ```
 
