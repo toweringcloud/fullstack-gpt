@@ -257,8 +257,8 @@ if video_source:
 else:
     # [Nomadcoders] What is the Difference Between SQLite, MySQL and PostgreSQL?
     sample_video = "http://youtube.com/watch?v=ocZid4g4UpY"
-    yt = YouTube(sample_video)
+    # yt = YouTube(sample_video)
     # https://github.com/conf42/src/commit/7326e47af48bf61e7e279136006589cc75b940f0
     # pip install pytubefix
-    stream = yt.streams.get_highest_resolution()
-    stream.download(output_path="./.cache", filename="sample.mp4")
+    # stream = yt.streams.get_highest_resolution()
+    # stream.download(output_path="./.cache", filename="sample.mp4")
