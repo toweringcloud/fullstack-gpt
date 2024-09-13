@@ -259,8 +259,12 @@ if video_source:
     with qa_tab:
         if has_transcript():
             retriever = embed_file(transcript_path)
-            docs = retriever.invoke("Does he talk about SQL?")
-            st.write(docs)
+            question = st.text_input("Input question about your audio script.")
+
+            if question:
+                docs = retriever.invoke(question)
+                for doc in docs:
+                    st.write(f"- {doc.page_content}")
         else:
             print(f"{transcript_path} not available!")
 
