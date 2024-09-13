@@ -50,7 +50,7 @@ et-xmlfile==1.1.0
 executing==1.2.0
 faiss-cpu==1.7.4
 # fastapi==0.99.1
-fastapi==0.114.1
+fastapi>=0.95.2
 ffmpeg==1.4
 ffmpeg-python==0.2.0
 filelock==3.12.4
