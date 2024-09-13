@@ -218,9 +218,11 @@ if selected_url:
     if selected_url == "cloudflare":
         sitemap_url = "https://developers.cloudflare.com/sitemap-0.xml"
     elif selected_url == "flutter":
-        sitemap_url = "https://docs.flutter.dev/sitemap.xml"
+        # sitemap_url = "https://docs.flutter.dev/sitemap.xml"
+        st.error("Comming Soon...")
     elif selected_url == "meta":
-        sitemap_url = "https://www.meta.com/sitemap.xml"
+        # sitemap_url = "https://www.meta.com/sitemap.xml"
+        st.error("Comming Soon...")
 
 if sitemap_url:
     if ".xml" not in sitemap_url:
