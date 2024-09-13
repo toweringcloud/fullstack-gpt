@@ -133,7 +133,7 @@ with st.sidebar:
         ),
     )
 
-    if quiz_target == "File":
+    if quiz_target == "Your Document File":
         file = st.file_uploader(
             "Upload a .docx, .txt or .pdf file.", type=["pdf", "txt", "docx"]
         )
