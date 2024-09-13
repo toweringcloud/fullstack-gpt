@@ -101,10 +101,6 @@ def transcribe_chunks(chunks_folder, destination):
 
     for file in files:
         with open(file, "rb") as audio_file, open(destination, "a") as text_file:
-            # transcription = openai.Audio.transcribe(
-            #     "whisper-1",
-            #     audio_file,
-            # )
             # https://platform.openai.com/docs/guides/speech-to-text
             transcription = client.audio.transcriptions.create(
                 model="whisper-1",
@@ -116,7 +112,8 @@ def transcribe_chunks(chunks_folder, destination):
     print(f"transcribe_chunks.o: {Path(destination).stat().st_size} bytes")
 
 
-@st.cache_data()
+# @st.cache_data()
+@st.cache_resource()
 def embed_file(file_path):
     dir_path = f"./.cache/embeddings/{video_name}"
     Path(dir_path).mkdir(parents=True, exist_ok=True)
@@ -212,51 +209,52 @@ if video_source:
     with summary_tab:
         start = st.button("Generate summary")
         if start:
-            if Path(transcript_path).stat().st_size == 0:
-                print(f"{transcript_path} has no data!")
+            if has_transcript():
+                loader = TextLoader(transcript_path)
+                docs = loader.load_and_split(text_splitter=splitter)
 
-            loader = TextLoader(transcript_path)
-            docs = loader.load_and_split(text_splitter=splitter)
+                first_summary_prompt = ChatPromptTemplate.from_template(
+                """
+                    Write a concise summary of the following:
+                    "{text}"
+                    CONCISE SUMMARY:
+                """
+                )
 
-            first_summary_prompt = ChatPromptTemplate.from_template(
-            """
-                Write a concise summary of the following:
-                "{text}"
-                CONCISE SUMMARY:
-            """
-            )
+                first_summary_chain = first_summary_prompt | llm | StrOutputParser()
+                summary = first_summary_chain.invoke(
+                    {"text": docs[0].page_content},
+                )
 
-            first_summary_chain = first_summary_prompt | llm | StrOutputParser()
-            summary = first_summary_chain.invoke(
-                {"text": docs[0].page_content},
-            )
+                refine_prompt = ChatPromptTemplate.from_template(
+                """
+                    Your job is to produce a final summary.
+                    We have provided an existing summary up to a certain point: {existing_summary}
+                    We have the opportunity to refine the existing summary (only if needed) with some more context below.
+                    ------------
+                    {context}
+                    ------------
+                    Given the new context, refine the original summary.
+                    If the context isn't useful, RETURN the original summary.
+                """
+                )
 
-            refine_prompt = ChatPromptTemplate.from_template(
-            """
-                Your job is to produce a final summary.
-                We have provided an existing summary up to a certain point: {existing_summary}
-                We have the opportunity to refine the existing summary (only if needed) with some more context below.
-                ------------
-                {context}
-                ------------
-                Given the new context, refine the original summary.
-                If the context isn't useful, RETURN the original summary.
-            """
-            )
+                refine_chain = refine_prompt | llm | StrOutputParser()
 
-            refine_chain = refine_prompt | llm | StrOutputParser()
+                with st.status("Summarizing...") as status:
+                    for i, doc in enumerate(docs[1:]):
+                        status.update(label=f"Processing document {i+1}/{len(docs)-1} ")
+                        summary = refine_chain.invoke(
+                            {
+                                "existing_summary": summary,
+                                "context": doc.page_content,
+                            }
+                        )
+                        st.write(summary)
+                st.write(summary)
 
-            with st.status("Summarizing...") as status:
-                for i, doc in enumerate(docs[1:]):
-                    status.update(label=f"Processing document {i+1}/{len(docs)-1} ")
-                    summary = refine_chain.invoke(
-                        {
-                            "existing_summary": summary,
-                            "context": doc.page_content,
-                        }
-                    )
-                    st.write(summary)
-            st.write(summary)
+            else:
+                print(f"{transcript_path} not available!")
 
     with qa_tab:
         if has_transcript():
