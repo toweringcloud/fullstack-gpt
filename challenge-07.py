@@ -214,39 +214,36 @@ else:
         # ],
     )
 
-if selected_url:
-    if selected_url == "cloudflare":
-        sitemap_url = "https://developers.cloudflare.com/sitemap-0.xml"
-    elif selected_url == "flutter":
-        # sitemap_url = "https://docs.flutter.dev/sitemap.xml"
-        st.error("Comming Soon...")
-    elif selected_url == "meta":
-        # sitemap_url = "https://www.meta.com/sitemap.xml"
-        st.error("Comming Soon...")
+    if selected_url:
+        if selected_url == "cloudflare":
+            sitemap_url = "https://developers.cloudflare.com/sitemap-0.xml"
+        elif selected_url == "flutter":
+            # sitemap_url = "https://docs.flutter.dev/sitemap.xml"
+            st.error("Comming Soon...")
+        elif selected_url == "meta":
+            # sitemap_url = "https://www.meta.com/sitemap.xml"
+            st.error("Comming Soon...")
 
-if sitemap_url:
-    if ".xml" not in sitemap_url:
-        with st.sidebar:
-            st.error("Please write down a Sitemap URL.")
-    else:
-        # web.Application(handler_args={'max_field_size': 16380})
-        # ClientResponseError: 400, message='Got more than 8190 bytes (12827) when reading Header value is too long.', url=URL('https://www.cloudflare.com/application-services/products/cloudflare-spectrum/')
-        # Retrying langchain.embeddings.openai.embed_with_retry.<locals>._embed_with_retry in 4.0 seconds as it raised RateLimitError: Rate limit reached for text-embedding-ada-002 in organization org-UvVnVP4ROYREanHJyUM7wz4O on tokens per min (TPM): Limit 1000000, Used 735993, Requested 747646. Please try again in 29.018s. Visit https://platform.openai.com/account/rate-limits to learn more..
-        retriever = load_website(sitemap_url)
+    if sitemap_url:
+        if ".xml" not in sitemap_url:
+            with st.sidebar:
+                st.error("Please write down a Sitemap URL.")
+        else:
+            # web.Application(handler_args={'max_field_size': 16380})
+            # ClientResponseError: 400, message='Got more than 8190 bytes (12827) when reading Header value is too long.', url=URL('https://www.cloudflare.com/application-services/products/cloudflare-spectrum/')
+            # Retrying langchain.embeddings.openai.embed_with_retry.<locals>._embed_with_retry in 4.0 seconds as it raised RateLimitError: Rate limit reached for text-embedding-ada-002 in organization org-UvVnVP4ROYREanHJyUM7wz4O on tokens per min (TPM): Limit 1000000, Used 735993, Requested 747646. Please try again in 29.018s. Visit https://platform.openai.com/account/rate-limits to learn more..
+            retriever = load_website(sitemap_url)
 
-        st.divider()
-        query = st.text_input("Ask a question to the website.")
-        if query:
-            chain = (
-                {
-                    "docs": retriever,
-                    "question": RunnablePassthrough(),
-                }
-                | RunnableLambda(get_answers)
-                | RunnableLambda(choose_answer)
-            )
-            result = chain.invoke(query)
-            st.markdown(result.content.replace("$", "\$"))
-
-# reference site
-# https://github.com/magio-hercules/fullstack-gpt
+            st.divider()
+            query = st.text_input("Ask a question to the website.")
+            if query:
+                chain = (
+                    {
+                        "docs": retriever,
+                        "question": RunnablePassthrough(),
+                    }
+                    | RunnableLambda(get_answers)
+                    | RunnableLambda(choose_answer)
+                )
+                result = chain.invoke(query)
+                st.markdown(result.content.replace("$", "\$"))
