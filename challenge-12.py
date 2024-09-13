@@ -1,266 +1,136 @@
 # fullstack gpt code challenge 12
-import glob
-import math
-import openai
-import os
 import streamlit as st
-import subprocess
-from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import TextLoader
-from langchain.embeddings import CacheBackedEmbeddings, OpenAIEmbeddings
+from langchain.chat_models import ChatOllama
+from langchain.callbacks.base import BaseCallbackHandler
+from langchain.document_loaders import UnstructuredFileLoader
+from langchain.embeddings import CacheBackedEmbeddings, OllamaEmbeddings
 from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
+from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.storage import LocalFileStore
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
-from pathlib import Path
-from pydub import AudioSegment
-from pytubefix import YouTube
 
 
 st.set_page_config(
-    page_title="::: Meeting GPT :::",
-    page_icon="💼",
+    page_title="::: Private GPT :::",
+    page_icon="📃",
 )
-st.title("Meeting GPT")
+st.title("Private GPT")
 
 st.markdown(
 """
-    Welcome to Meeting GPT!
+    Welcome to Private GPT!
 
-    Upload a video and I will give you a transcript, a summary and a chatbot to ask any questions about it.
+    Use this chatbot to ask questions to an AI about your files.
 
-    Get started by uploading a video file in the sidebar.
+    Upload your files on the sidebar.
 """
 )
 
 
-@st.cache_data()
-def extract_audio_from_video(video_path, audio_path):
-    if has_transcript:
-        return
-    if not os.path.exists(video_path):
-        print(f"video({video_path}) not available!")
+class ChatCallbackHandler(BaseCallbackHandler):
+    message = ""
 
-    # check ffmpeg utility installed
-    """
-        $ choco install ffmpeg -y
-        $ ffmpeg -version
-        ffmpeg version 7.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2024 the FFmpeg developers
-        built with gcc 13.2.0 (Rev5, Built by MSYS2 project)
-    """
-    command = [
-        "ffmpeg",
-        "-y",
-        "-i",
-        video_path,
-        "-vn",
-        audio_path,
-    ]
-    subprocess.run(command)
+    def on_llm_start(self, *args, **kwargs):
+        self.message_box = st.empty()
+
+    def on_llm_end(self, *args, **kwargs):
+        save_message(self.message, "ai")
+
+    def on_llm_new_token(self, token, *args, **kwargs):
+        self.message += token
+        self.message_box.markdown(self.message)
+
+llm = ChatOllama(
+    model="mistral:latest",
+    temperature=0.1,
+    streaming=True,
+    callbacks=[
+        ChatCallbackHandler(),
+    ],
+)
 
 
-@st.cache_data()
-def cut_audio_in_chunks(audio_path, chunk_size, chunks_folder):
-    if has_transcript:
-        return
-    if not os.path.exists(audio_path):
-        print(f"audio({video_path}) not available!")
-
-    track = AudioSegment.from_mp3(audio_path)
-    chunk_len = chunk_size * 60 * 1000
-    chunks = math.ceil(len(track) / chunk_len)
-    for i in range(chunks):
-        start_time = i * chunk_len
-        end_time = (i + 1) * chunk_len
-        chunk = track[start_time:end_time]
-        chunk.export(
-            f"./{chunks_folder}/chunk_{i}.mp3",
-            format="mp3",
-        )
-
-
-@st.cache_data()
-def transcribe_chunks(chunks_folder, destination):
-    if has_transcript:
-        return
-
-    print(f"transcribe_chunks.i: {chunks_folder} | {destination}")
-    files = glob.glob(f"{chunks_folder}/*.mp3")
-    files.sort()
-    print(f"transcribe_chunks.c: {files.count} files")
-
-    for file in files:
-        with open(file, "rb") as audio_file, open(destination, "a") as text_file:
-            transcript = openai.Audio.transcribe(
-                "whisper-1",
-                audio_file,
-            )
-            text_file.write(transcript["text"])
-    print(f"transcribe_chunks.o: {Path(destination).stat().st_size} bytes")
-
-
-@st.cache_data()
-def embed_file(file_path):
-    dir_path = f"./.cache/embeddings/{video_name}"
-    Path(dir_path).mkdir(parents=True, exist_ok=True)
-    cache_dir = LocalFileStore(dir_path)
-    loader = TextLoader(file_path)
+@st.cache_data(show_spinner="Embedding file...")
+def embed_file(file):
+    file_content = file.read()
+    file_path = f"./.cache/private_files/{file.name}"
+    with open(file_path, "wb") as f:
+        f.write(file_content)
+    cache_dir = LocalFileStore(f"./.cache/private_embeddings/{file.name}")
+    splitter = CharacterTextSplitter.from_tiktoken_encoder(
+        separator="\n",
+        chunk_size=600,
+        chunk_overlap=100,
+    )
+    loader = UnstructuredFileLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    embeddings = OllamaEmbeddings(model="mistral:latest")
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
     retriever = vectorstore.as_retriever()
     return retriever
 
 
-with st.sidebar:
-    # API Key 입력
-    openai_api_key = st.text_input(
-        "Input your OpenAI API Key",
-        type="password"
-    )
+def save_message(message, role):
+    st.session_state["messages"].append({"message": message, "role": role})
 
-    # AI Model 선택
-    selected_model = st.selectbox(
-        "Choose your AI Model",
-        (
-            "gpt-3.5-turbo",
-            "gpt-4o-mini"
+
+def send_message(message, role, save=True):
+    with st.chat_message(role):
+        st.markdown(message)
+    if save:
+        save_message(message, role)
+
+
+def paint_history():
+    for message in st.session_state["messages"]:
+        send_message(
+            message["message"],
+            message["role"],
+            save=False,
         )
+
+
+def format_docs(docs):
+    return "\n\n".join(document.page_content for document in docs)
+
+
+prompt = ChatPromptTemplate.from_template(
+    """
+        Answer the question using ONLY the following context and not your training data.
+        If you don't know the answer just say you don't know. DON'T make anything up.
+
+        Context: {context}
+        Question:{question}
+    """
+)
+
+
+with st.sidebar:
+    file = st.file_uploader(
+        "Upload a .txt .pdf or .docx file",
+        type=["pdf", "txt", "docx"],
     )
 
-    # Video 파일 업로드
-    video_source = st.file_uploader(
-        "Upload your Video file",
-        type=["mp4", "avi", "mkv", "mov"],
-    )
+if file:
+    retriever = embed_file(file)
+    send_message("I'm ready! Ask away!", "ai", save=False)
+    paint_history()
+    message = st.chat_input("Ask anything about your file...")
 
-    # Github Repo Link
-    st.markdown("---")
-    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-12.py"
-    badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
-    st.write(f"[![Repo]({badge_link})]({github_link})")
-
-if not openai_api_key:
-    st.error("Please input your OpenAI API Key on the sidebar")
+    if message:
+        send_message(message, "human")
+        chain = (
+            {
+                "question": RunnablePassthrough(),
+                "context": retriever | RunnableLambda(format_docs),
+            }
+            | prompt
+            | llm
+        )
+        with st.chat_message("ai"):
+            chain.invoke(message)
 
 else:
-    llm = ChatOpenAI(
-        openai_api_key=openai_api_key,
-        model=selected_model,
-        temperature=0.1,
-    )
-
-if video_source:
-    video_name = video_source.name
-    video_extension = Path(video_name).suffix
-    video_path = f"./files/{video_name}"
-    audio_path = video_path.replace(video_extension, ".mp3")
-    transcript_path = video_path.replace(video_extension, ".txt")
-
-    has_transcript = os.path.exists(transcript_path)
-
-    chunks_folder = f"./.cache/chunks/{video_name}"
-    Path(chunks_folder).mkdir(parents=True, exist_ok=True)
-
-    splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        chunk_size=800,
-        chunk_overlap=100,
-    )
-
-    with st.status("Loading video...") as status:
-        video_content = video_source.read()
-        with open(video_path, "wb") as f:
-            f.write(video_content)
-
-        status.update(label="Extracting audio...")
-        extract_audio_from_video(video_path, audio_path)
-
-        status.update(label="Cutting audio segments...")
-        chunk_minutes = 3
-        cut_audio_in_chunks(audio_path, chunk_minutes, chunks_folder)
-
-        status.update(label="Transcribing audio...")
-        transcribe_chunks(chunks_folder, transcript_path)
-
-    transcript_tab, summary_tab, qa_tab = st.tabs(
-        [
-            "Transcript",
-            "Summary",
-            "Q&A",
-        ]
-    )
-
-    with transcript_tab:
-        with open(transcript_path, "r") as file:
-            st.write(file.read())
-
-    with summary_tab:
-        start = st.button("Generate summary")
-        if start:
-            if Path(transcript_path).stat().st_size == 0:
-                print(f"{transcript_path} has no data!")
-
-            loader = TextLoader(transcript_path)
-            docs = loader.load_and_split(text_splitter=splitter)
-
-            first_summary_prompt = ChatPromptTemplate.from_template(
-            """
-                Write a concise summary of the following:
-                "{text}"
-                CONCISE SUMMARY:
-            """
-            )
-
-            first_summary_chain = first_summary_prompt | llm | StrOutputParser()
-            summary = first_summary_chain.invoke(
-                {"text": docs[0].page_content},
-            )
-
-            refine_prompt = ChatPromptTemplate.from_template(
-            """
-                Your job is to produce a final summary.
-                We have provided an existing summary up to a certain point: {existing_summary}
-                We have the opportunity to refine the existing summary (only if needed) with some more context below.
-                ------------
-                {context}
-                ------------
-                Given the new context, refine the original summary.
-                If the context isn't useful, RETURN the original summary.
-            """
-            )
-
-            refine_chain = refine_prompt | llm | StrOutputParser()
-
-            with st.status("Summarizing...") as status:
-                for i, doc in enumerate(docs[1:]):
-                    status.update(label=f"Processing document {i+1}/{len(docs)-1} ")
-                    summary = refine_chain.invoke(
-                        {
-                            "existing_summary": summary,
-                            "context": doc.page_content,
-                        }
-                    )
-                    st.write(summary)
-            st.write(summary)
-
-    with qa_tab:
-        if has_transcript:
-            if Path(transcript_path).stat().st_size > 0:
-                retriever = embed_file(transcript_path)
-                docs = retriever.invoke("Does he talk about SQL?")
-                st.write(docs)
-            else:
-                print(f"{transcript_path} has no data!")
-        else:
-            print(f"{transcript_path} not available!")
-
-else:
-    # [Nomadcoders] What is the Difference Between SQLite, MySQL and PostgreSQL?
-    sample_video = "http://youtube.com/watch?v=ocZid4g4UpY"
-    # yt = YouTube(sample_video)
-    # https://github.com/conf42/src/commit/7326e47af48bf61e7e279136006589cc75b940f0
-    # pip install pytubefix
-    # stream = yt.streams.get_highest_resolution()
-    # stream.download(output_path="./.cache", filename="sample.mp4")
+    st.session_state["messages"] = []

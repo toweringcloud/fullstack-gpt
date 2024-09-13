@@ -162,6 +162,5 @@ cython_debug/
 #.idea/
 
 requirements_*.txt
-files/sample*
 test*
 Test*

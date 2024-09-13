@@ -28,13 +28,13 @@ langchain based gpt & agent service
 
 ### challenge-09 : Research Assistant with agent + thread + run
 
-### challenge-10 : Multiple Research Agents with Crew AI (TBD)
+### challenge-10 : Multiple Research Staffs with Crew AI (TBD)
 
-### challenge-11 : Private GPT with Ollama LLM (TBD)
-
-### challenge-12 : Meeting GPT with refined chain
+### challenge-11 : Meeting GPT with refined chain
 
 - [demo] https://fullstack-gpt-meeting.streamlit.app
+
+### challenge-12 : Private GPT with Ollama LLM
 
 ### challenge-13 : Chef GPT for custom ChatGTPs action (TBD)
 
