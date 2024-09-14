@@ -1,4 +1,4 @@
-# fullstack gpt code challenge 08
+# fullstack gpt code challenge 09
 import json
 import streamlit as st
 from duckduckgo_search import DDGS
@@ -15,14 +15,14 @@ from typing import Type
 
 
 st.set_page_config(
-    page_title="::: Research Agent :::",
+    page_title="::: Research Assistant :::",
     page_icon="📜",
 )
-st.title("Research Agent")
+st.title("Research Assistant")
 
 st.markdown(
 """
-    Welcome to Research Agent!\n
+    Welcome to Research Assistant!\n
     Use this chatbot to research somthing you're curious about.\n
     ex) Research about the XZ backdoor
 """
@@ -144,7 +144,7 @@ class SearchResultSaveTool(BaseTool):
     ] = SearchResultSaveToolArgsSchema
 
     def _run(self, content):
-        file_path = "./challenge-08.result"
+        file_path = "./challenge-09.result"
         with open(file_path, "w+", encoding="utf-8") as f:
             f.write(content)
 
