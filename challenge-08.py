@@ -15,14 +15,14 @@ from typing import Type
 
 
 st.set_page_config(
-    page_title="::: Research GPT :::",
+    page_title="::: Research Agent :::",
     page_icon="📜",
 )
-st.title("Research GPT")
+st.title("Research Agent")
 
 st.markdown(
 """
-    Welcome to Research GPT!
+    Welcome to Research Agent!
 
     Use this chatbot to give your research mission.
 
@@ -147,7 +147,7 @@ class SearchResultSaveTool(BaseTool):
     ] = SearchResultSaveToolArgsSchema
 
     def _run(self, content):
-        file_path = "./challenge-09.result"
+        file_path = "./challenge-08.result"
         with open(file_path, "w+", encoding="utf-8") as f:
             f.write(content)
 
