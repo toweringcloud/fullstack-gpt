@@ -112,8 +112,7 @@ def transcribe_chunks(chunks_folder, destination):
     print(f"transcribe_chunks.o: {Path(destination).stat().st_size} bytes")
 
 
-# @st.cache_data()
-@st.cache_resource()
+@st.cache_resource(show_spinner="Embedding file...")
 def embed_file(file_path):
     dir_path = f"./.cache/embeddings/{video_name}"
     Path(dir_path).mkdir(parents=True, exist_ok=True)
