@@ -258,7 +258,7 @@ if video_source:
     with qa_tab:
         if has_transcript():
             retriever = embed_file(transcript_path)
-            question = st.text_input("Input question about your audio script.")
+            question = st.text_input("Ask question about your audio script.")
 
             if question:
                 docs = retriever.invoke(question)
@@ -276,4 +276,5 @@ else:
     if download_ok:
         yt = YouTube(sample_video)
         stream = yt.streams.get_highest_resolution()
+        Path("./.cache").mkdir(parents=True, exist_ok=True)
         stream.download(output_path="./.cache", filename="podcast.mp4")
