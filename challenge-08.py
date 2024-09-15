@@ -46,9 +46,6 @@ def paint_history():
     for message in st.session_state["messages"]:
         send_message(message["message"], message["role"], save=False)
 
-def format_docs(docs):
-    return "\n\n".join(document.page_content for document in docs)
-
 
 class ChatCallbackHandler(BaseCallbackHandler):
     message = ""
@@ -64,7 +61,7 @@ class ChatCallbackHandler(BaseCallbackHandler):
         self.message_box.markdown(self.message)
 
 
-class WikipediaSearchToolArgsSchema(BaseModel):
+class SearchToolArgsSchema(BaseModel):
     query: str = Field(
         description="The query you will search for information. ex) XZ backdoor"
     )
@@ -76,19 +73,13 @@ class WikipediaSearchTool(BaseTool):
         It takes a query as an argument.
     """
     args_schema: Type[
-        WikipediaSearchToolArgsSchema
-    ] = WikipediaSearchToolArgsSchema
+        SearchToolArgsSchema
+    ] = SearchToolArgsSchema
 
     def _run(self, query):
         wrapper = WikipediaAPIWrapper()
         search = WikipediaQueryRun(api_wrapper=wrapper)
         return search.run(query)
-
-
-class DuckDuckGoSearchToolArgsSchema(BaseModel):
-    query: str = Field(
-        description="The query you will search for information. ex) XZ backdoor"
-    )
 
 class DuckDuckGoSearchTool(BaseTool):
     name = "DuckDuckGoSearchTool"
@@ -97,8 +88,8 @@ class DuckDuckGoSearchTool(BaseTool):
         It takes a query as an argument.
     """
     args_schema: Type[
-        DuckDuckGoSearchToolArgsSchema
-    ] = DuckDuckGoSearchToolArgsSchema
+        SearchToolArgsSchema
+    ] = SearchToolArgsSchema
 
     def _run(self, query):
         # fix : DuckDuckGoSearchAPIWrapper (HTTP Error) -> duckduckgo_search.DDGS
@@ -160,8 +151,8 @@ with st.sidebar:
     selected_model = st.selectbox(
         "Choose your AI Model",
         (
-            "gpt-3.5-turbo",
             "gpt-4o-mini",
+            "gpt-3.5-turbo",
         )
     )
 
@@ -174,6 +165,7 @@ with st.sidebar:
 
 def main():
     if not openai_api_key:
+        st.error("Please input your OpenAI API Key on the sidebar.")
         return
 
     llm = ChatOpenAI(
@@ -213,13 +205,13 @@ def main():
     send_message("I'm ready! Ask away!", "ai", save=False)
     paint_history()
 
-    message = st.chat_input("Ask anything you're curious about.")
-    if message:
-        send_message(message, "human")
+    question = st.chat_input("Ask anything you're curious about.")
+    if question:
+        send_message(question, "human")
 
         with st.chat_message("ai"):
             st.markdown("Researching about your question...")
-            result = agent.invoke(message)
+            agent.invoke(question)
 
     else:
         st.session_state["messages"] = []
