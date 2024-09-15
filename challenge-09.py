@@ -1,17 +1,7 @@
 # fullstack gpt code challenge 09
-import json
 import streamlit as st
-from duckduckgo_search import DDGS
-from langchain.agents import initialize_agent, AgentType
-from langchain.callbacks.base import BaseCallbackHandler
-from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import WebBaseLoader
-from langchain.schema import SystemMessage
-from langchain.schema.runnable import RunnableLambda
-from langchain.tools import BaseTool, WikipediaQueryRun
-from langchain.utilities import WikipediaAPIWrapper
-from pydantic import BaseModel, Field
-from typing import Type
+from openai import OpenAI, AssistantEventHandler
+from typing_extensions import override
 
 
 st.set_page_config(
@@ -24,129 +14,94 @@ st.markdown(
 """
     Welcome to Research Assistant!\n
     Use this chatbot to research somthing you're curious about.\n
-    ex) Research about the XZ backdoor
+    ex) Research about the global warming
 """
 )
 st.divider()
 
 
-if "messages" not in st.session_state:
-    st.session_state["messages"] = []
-
-def save_message(message, role):
-    st.session_state["messages"].append({"message": message, "role": role})
-
-def send_message(message, role, save=True):
-    with st.chat_message(role):
-        st.markdown(message)
-    if save:
-        save_message(message, role)
-
-def paint_history():
-    for message in st.session_state["messages"]:
-        send_message(message["message"], message["role"], save=False)
-
-def format_docs(docs):
-    return "\n\n".join(document.page_content for document in docs)
-
-
-class ChatCallbackHandler(BaseCallbackHandler):
+# https://platform.openai.com/docs/assistants/tools/function-calling?context=streaming
+class EventHandler(AssistantEventHandler):
     message = ""
 
-    def on_llm_start(self, *args, **kwargs):
-        self.message_box = st.empty()
+    @override
+    def on_event(self, event):
+        # Retrieve events that are denoted with 'requires_action'
+        # since these will have our tool_calls
+        if event.event == 'thread.run.requires_action':
+            run_id = event.data.id  # Retrieve the run ID from the event data
+            self.message_box = st.empty()
+            self.handle_requires_action(event.data, run_id)
 
-    def on_llm_end(self, *args, **kwargs):
-        save_message(self.message, "ai")
+    def handle_requires_action(self, data, run_id):
+        tool_outputs = []
 
-    def on_llm_new_token(self, token, *args, **kwargs):
-        self.message += token
-        self.message_box.markdown(self.message)
+        for tool in data.required_action.submit_tool_outputs.tool_calls:
+            if tool.function.name == "WikipediaSearchTool":
+                tool_outputs.append({"tool_call_id": tool.id, "output": "wiki"})
+            elif tool.function.name == "DuckDuckGoSearchTool":
+                tool_outputs.append({"tool_call_id": tool.id, "output": "ddg"})
 
+        # Submit all tool_outputs at the same time
+        self.submit_tool_outputs(tool_outputs, run_id)
 
-class WikipediaSearchToolArgsSchema(BaseModel):
-    query: str = Field(
-        description="The query you will search for information. ex) XZ backdoor"
-    )
+    def submit_tool_outputs(self, tool_outputs, run_id):
+        # Use the submit_tool_outputs_stream helper
+        with client.beta.threads.runs.submit_tool_outputs_stream(
+            thread_id=self.current_run.thread_id,
+            run_id=self.current_run.id,
+            tool_outputs=tool_outputs,
+            event_handler=EventHandler(),
+        ) as stream:
+            for text in stream.text_deltas:
+                self.message += text
+                self.message_box.markdown(self.message)
+                print(text, end="", flush=True)
+            print()
+        self.save_final_result(self.message)
 
-class WikipediaSearchTool(BaseTool):
-    name = "WikipediaSearchTool"
-    description = """
-        Use this tool to search information on wikipedia site.
-        It takes a query as an argument.
-    """
-    args_schema: Type[
-        WikipediaSearchToolArgsSchema
-    ] = WikipediaSearchToolArgsSchema
-
-    def _run(self, query):
-        wrapper = WikipediaAPIWrapper()
-        search = WikipediaQueryRun(api_wrapper=wrapper)
-        return search.run(query)
-
-
-class DuckDuckGoSearchToolArgsSchema(BaseModel):
-    query: str = Field(
-        description="The query you will search for information. ex) XZ backdoor"
-    )
-
-class DuckDuckGoSearchTool(BaseTool):
-    name = "DuckDuckGoSearchTool"
-    description = """
-        Use this tool to search information on duckduckgo site.
-        It takes a query as an argument.
-    """
-    args_schema: Type[
-        DuckDuckGoSearchToolArgsSchema
-    ] = DuckDuckGoSearchToolArgsSchema
-
-    def _run(self, query):
-        # fix : DuckDuckGoSearchAPIWrapper (HTTP Error) -> duckduckgo_search.DDGS
-        # ddgs text -k "Research about the XZ backdoor"
-        search = DDGS().text(query)
-        return json.dumps(list(search))
-
-
-class SearchResultParseToolArgsSchema(BaseModel):
-    link: str = Field(
-        description="The site link retrieved from web search"
-    )
-
-class SearchResultParseTool(BaseTool):
-    name = "SearchResultParseTool"
-    description = """
-        Use this tool to load link to return detail content.
-        It takes a link as an argument.
-    """
-    args_schema: Type[
-        SearchResultParseToolArgsSchema
-    ] = SearchResultParseToolArgsSchema
-
-    def _run(self, link):
-        loader = WebBaseLoader(link, verify_ssl=True)
-        data = loader.load()
-        return data
-
-
-class SearchResultSaveToolArgsSchema(BaseModel):
-    content: str = Field(
-        description="The search result on wikipedia or duckduckgo site"
-    )
-
-class SearchResultSaveTool(BaseTool):
-    name = "SearchResultSaveTool"
-    description = """
-        Use this tool to save web search result.
-        It takes a result as an argument.
-    """
-    args_schema: Type[
-        SearchResultSaveToolArgsSchema
-    ] = SearchResultSaveToolArgsSchema
-
-    def _run(self, content):
+    def save_research_result(self, content):
         file_path = "./challenge-09.result"
         with open(file_path, "w+", encoding="utf-8") as f:
             f.write(content)
+        st.markdown(f"research result saved at {file_path}")
+
+
+function_wiki = {
+    "type": "function",
+    "function": {
+        "name": "WikipediaSearchTool",
+        "description": "Search information on wikipedia site",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "user's input",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+}
+
+function_ddgs = {
+    "type": "function",
+    "function": {
+        "name": "DuckDuckGoSearchTool",
+        "description": "Search information on duckduckgo site",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "user's input",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+}
 
 
 with st.sidebar:
@@ -156,12 +111,12 @@ with st.sidebar:
         type="password"
     )
 
-    # Model 선택
+    # AI Model 선택
     selected_model = st.selectbox(
         "Choose your AI Model",
         (
-            "gpt-3.5-turbo",
             "gpt-4o-mini",
+            "gpt-3.5-turbo",
         )
     )
 
@@ -173,57 +128,64 @@ with st.sidebar:
 
 
 def main():
-    if not openai_api_key:
-        return
+    if "client" in st.session_state:
+        client = st.session_state["client"]
+        assistant = st.session_state["assistant"]
+        thread = st.session_state["thread"]
 
-    llm = ChatOpenAI(
-        openai_api_key=openai_api_key,
-        model=selected_model,
-        temperature=0.1,
-        streaming=True,
-        callbacks=[
-            ChatCallbackHandler(),
-        ],
-    )
+    else:
+        if not openai_api_key:
+            st.error("Please input your OpenAI API Key on the sidebar.")
+            return
 
-    agent = initialize_agent(
-        llm=llm,
-        verbose=True,
-        agent=AgentType.OPENAI_FUNCTIONS,
-        handle_parsing_errors=True,
-        tools=[
-            WikipediaSearchTool(),
-            DuckDuckGoSearchTool(),
-            SearchResultParseTool(),
-            SearchResultSaveTool(),
-        ],
-        agent_kwargs={
-            "system_message": SystemMessage(
-                content="""
-                    You are a web research expert.
+        # https://pypi.org/project/openai
+        client = OpenAI(api_key=openai_api_key)
+        assistant = client.beta.assistants.create(
+            name="Research Expert",
+            instructions="You are a web research bot. Search information by query and save summarized result into file.",
+            temperature=0.1,
+            model=selected_model,
+            tools=[
+                function_wiki,
+                function_ddgs,
+            ],
+        )
+        thread = client.beta.threads.create()
 
-                    You search information by query and save the result contents into file.
-                    Be sure to use two sites and summarize the results less than 1000 words.
-                    If communication error occurs, skip the task and go to next step, please.
-                """
-            )
-        },
-    )
+        st.session_state["client"] = client
+        st.session_state["assistant"] = assistant
+        st.session_state["thread"] = thread
 
-    send_message("I'm ready! Ask away!", "ai", save=False)
-    paint_history()
+        with st.chat_message("ai"):
+            st.markdown("I'm ready! Ask away!")
 
-    message = st.chat_input("Ask anything you're curious about.")
-    if message:
-        send_message(message, "human")
+    messages = client.beta.threads.messages.list(thread_id=thread.id)
+    if messages:
+        messages = list(messages)
+        messages.reverse()
+        for message in messages:
+            st.chat_message(message.role).write(message.content[0].text.value)
+
+    question = st.chat_input("Ask anything you're curious about.")
+    if question:
+        with st.chat_message("human"):
+            st.markdown(question)
+
+        message = client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="human",
+            contents=question
+        )
 
         with st.chat_message("ai"):
             st.markdown("Researching about your question...")
-            result = agent.invoke(message)
 
-    else:
-        st.session_state["messages"] = []
-        return
+            with client.beta.threads.runs.stream(
+                thread_id=thread.id,
+                assistant_id=assistant.id,
+                event_handler=EventHandler()
+            ) as stream:
+                stream.until_done()
 
 try:
     main()
