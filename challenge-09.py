@@ -9,6 +9,7 @@ from openai import OpenAI, AssistantEventHandler
 from typing_extensions import override
 
 
+# show main ui
 st.set_page_config(
     page_title="::: Research Assistant :::",
     page_icon="📜",
@@ -22,6 +23,30 @@ st.markdown(
 """
 )
 st.divider()
+
+
+# show sidebar ui
+with st.sidebar:
+    # API Key
+    openai_api_key = st.text_input(
+        "Input your OpenAI API Key",
+        type="password"
+    )
+
+    # AI Model
+    selected_model = st.selectbox(
+        "Choose your AI Model",
+        (
+            "gpt-4o-mini",
+            "gpt-3.5-turbo",
+        )
+    )
+
+    # Github Repo
+    st.markdown("---")
+    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-09.py"
+    badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
+    st.write(f"[![Repo]({badge_link})]({github_link})")
 
 
 # define function logic
@@ -104,6 +129,7 @@ functions = [
 
 
 # https://platform.openai.com/docs/assistants/tools/function-calling?context=streaming
+# assistant event handler with streaming
 class EventHandler(AssistantEventHandler):
     message = ""
 
@@ -155,29 +181,6 @@ class EventHandler(AssistantEventHandler):
         st.markdown(f"research result saved at {file_path}")
 
 
-with st.sidebar:
-    # API Key
-    openai_api_key = st.text_input(
-        "Input your OpenAI API Key",
-        type="password"
-    )
-
-    # AI Model
-    selected_model = st.selectbox(
-        "Choose your AI Model",
-        (
-            "gpt-4o-mini",
-            "gpt-3.5-turbo",
-        )
-    )
-
-    # Github Repo
-    st.markdown("---")
-    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-09.py"
-    badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
-    st.write(f"[![Repo]({badge_link})]({github_link})")
-
-
 def main():
     client = None
 
@@ -193,7 +196,7 @@ def main():
 
         # https://pypi.org/project/openai
         client = OpenAI(api_key=openai_api_key)
-        
+
         # BadRequestError: Error code: 400 - {'error': {'message': "Unknown parameter: 'tools[1].function. '.", 'type': 'invalid_request_error', 'param': 'tools[1].function. ', 'code': 'unknown_parameter'}}
         assistant = client.beta.assistants.create(
             name="Research Expert",
