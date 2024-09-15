@@ -1,5 +1,10 @@
 # fullstack gpt code challenge 09
+import json
 import streamlit as st
+from duckduckgo_search import DDGS
+from langchain.document_loaders import WebBaseLoader
+from langchain.tools import WikipediaQueryRun
+from langchain.utilities import WikipediaAPIWrapper
 from openai import OpenAI, AssistantEventHandler
 from typing_extensions import override
 
@@ -20,6 +25,85 @@ st.markdown(
 st.divider()
 
 
+# define function logic
+def WikipediaSearchTool(params):
+    query = params["query"]
+    search = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+    return search.invoke(query)
+
+def DuckDuckGoSearchTool(params):
+    query = params["query"]
+    search = DDGS().text(query)
+    return json.dumps(list(search))
+
+def SearchResultParseTool(params):
+    link = params["link"]
+    loader = WebBaseLoader(link, verify_ssl=True)
+    return loader.load()
+
+# define function mapper
+functions_map = {
+    "wiki_search": WikipediaSearchTool,
+    "ddg_search": DuckDuckGoSearchTool,
+    "link_parse": SearchResultParseTool,
+}
+
+# define function schema
+functions = [
+    {
+        "type": "function",
+        "function": {
+            "name": "wiki_search",
+            "description": "Search information on wikipedia site",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "user's input",
+                    },
+                },
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "ddg_search",
+            "description": "Search information on duckduckgo site",
+            " ": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "user's input",
+                    },
+                },
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "link_parse",
+            "description": "Load link to parse into detail content.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "link": {
+                        "type": "string",
+                        "description": "search result's output",
+                    },
+                },
+                "required": ["link"],
+            },
+        },
+    }
+]
+
+
 # https://platform.openai.com/docs/assistants/tools/function-calling?context=streaming
 class EventHandler(AssistantEventHandler):
     message = ""
@@ -37,10 +121,11 @@ class EventHandler(AssistantEventHandler):
         tool_outputs = []
 
         for tool in data.required_action.submit_tool_outputs.tool_calls:
-            if tool.function.name == "WikipediaSearchTool":
-                tool_outputs.append({"tool_call_id": tool.id, "output": "wiki"})
-            elif tool.function.name == "DuckDuckGoSearchTool":
-                tool_outputs.append({"tool_call_id": tool.id, "output": "ddg"})
+            print(f"# tool: {tool.id} | {tool.function.name} | {tool.function.arguments}")
+            tool_outputs.append({
+                "tool_call_id": tool.id,
+                "output": functions_map[tool.function.name](json.loads(tool.function.arguments))
+            })
 
         # Submit all tool_outputs at the same time
         self.submit_tool_outputs(tool_outputs, run_id)
@@ -61,57 +146,21 @@ class EventHandler(AssistantEventHandler):
         self.save_final_result(self.message)
 
     def save_research_result(self, content):
+        st.session_state["result"] = content
         file_path = "./challenge-09.result"
         with open(file_path, "w+", encoding="utf-8") as f:
             f.write(content)
         st.markdown(f"research result saved at {file_path}")
 
 
-function_wiki = {
-    "type": "function",
-    "function": {
-        "name": "WikipediaSearchTool",
-        "description": "Search information on wikipedia site",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "user's input",
-                },
-            },
-            "required": ["query"],
-        },
-    },
-}
-
-function_ddgs = {
-    "type": "function",
-    "function": {
-        "name": "DuckDuckGoSearchTool",
-        "description": "Search information on duckduckgo site",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "user's input",
-                },
-            },
-            "required": ["query"],
-        },
-    },
-}
-
-
 with st.sidebar:
-    # API Key 입력
+    # API Key
     openai_api_key = st.text_input(
         "Input your OpenAI API Key",
         type="password"
     )
 
-    # AI Model 선택
+    # AI Model
     selected_model = st.selectbox(
         "Choose your AI Model",
         (
@@ -120,7 +169,7 @@ with st.sidebar:
         )
     )
 
-    # Github Repo Link
+    # Github Repo
     st.markdown("---")
     github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-09.py"
     badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
@@ -142,13 +191,10 @@ def main():
         client = OpenAI(api_key=openai_api_key)
         assistant = client.beta.assistants.create(
             name="Research Expert",
-            instructions="You are a web research bot. Search information by query and save summarized result into file.",
+            instructions="You are a web research bot. Search information by query, parse web links and summarize the result.",
             temperature=0.1,
             model=selected_model,
-            tools=[
-                function_wiki,
-                function_ddgs,
-            ],
+            tools=functions,
         )
         thread = client.beta.threads.create()
 
@@ -159,6 +205,7 @@ def main():
         with st.chat_message("ai"):
             st.markdown("I'm ready! Ask away!")
 
+    # show messages in the thread of your assistant
     messages = client.beta.threads.messages.list(thread_id=thread.id)
     if messages:
         messages = list(messages)
@@ -166,15 +213,18 @@ def main():
         for message in messages:
             st.chat_message(message.role).write(message.content[0].text.value)
 
+    # ready to research your question
     question = st.chat_input("Ask anything you're curious about.")
     if question:
         with st.chat_message("human"):
             st.markdown(question)
 
+        # BadRequestError: Error code: 400 - {'error': {'message': "Invalid value: 'human'. Supported values are: 'user' and 'assistant'.", 'type': 'invalid_request_error', 'param': 'role', 'code': 'invalid_value'}}
+        # BadRequestError: Error code: 400 - {'error': {'message': "Can't add messages to thread_i2LyHXXF8dZGKOy0zTIe2Riq while a run run_cVzucEYxgiNsR9rSPmFIHBJG is active.", 'type': 'invalid_request_error', 'param': None, 'code': None}
         message = client.beta.threads.messages.create(
             thread_id=thread.id,
-            role="human",
-            contents=question
+            role="user",
+            content=question
         )
 
         with st.chat_message("ai"):
@@ -186,6 +236,8 @@ def main():
                 event_handler=EventHandler()
             ) as stream:
                 stream.until_done()
+    else:
+        st.empty()
 
 try:
     main()
