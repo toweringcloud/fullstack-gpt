@@ -19,7 +19,6 @@ st.markdown(
 """
     Welcome to Research Assistant!\n
     Use this chatbot to research somthing you're curious about.\n
-    ex) Research about the global warming
 """
 )
 st.divider()
@@ -72,7 +71,7 @@ functions = [
         "function": {
             "name": "ddg_search",
             "description": "Search information on duckduckgo site",
-            " ": {
+            "parameters": {
                 "type": "object",
                 "properties": {
                     "query": {
@@ -131,6 +130,9 @@ class EventHandler(AssistantEventHandler):
         self.submit_tool_outputs(tool_outputs, run_id)
 
     def submit_tool_outputs(self, tool_outputs, run_id):
+        # NameError: name 'client' is not defined <- stream.until_done()
+        client = st.session_state["client"]
+
         # Use the submit_tool_outputs_stream helper
         with client.beta.threads.runs.submit_tool_outputs_stream(
             thread_id=self.current_run.thread_id,
@@ -143,13 +145,13 @@ class EventHandler(AssistantEventHandler):
                 self.message_box.markdown(self.message)
                 print(text, end="", flush=True)
             print()
-        self.save_final_result(self.message)
+            self.save_research_result()
 
-    def save_research_result(self, content):
-        st.session_state["result"] = content
+    def save_research_result(self):
+        st.session_state["result"] = self.message
         file_path = "./challenge-09.result"
         with open(file_path, "w+", encoding="utf-8") as f:
-            f.write(content)
+            f.write(self.message)
         st.markdown(f"research result saved at {file_path}")
 
 
@@ -177,6 +179,8 @@ with st.sidebar:
 
 
 def main():
+    client = None
+
     if "client" in st.session_state:
         client = st.session_state["client"]
         assistant = st.session_state["assistant"]
@@ -189,6 +193,8 @@ def main():
 
         # https://pypi.org/project/openai
         client = OpenAI(api_key=openai_api_key)
+        
+        # BadRequestError: Error code: 400 - {'error': {'message': "Unknown parameter: 'tools[1].function. '.", 'type': 'invalid_request_error', 'param': 'tools[1].function. ', 'code': 'unknown_parameter'}}
         assistant = client.beta.assistants.create(
             name="Research Expert",
             instructions="You are a web research bot. Search information by query, parse web links and summarize the result.",
