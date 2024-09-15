@@ -156,7 +156,6 @@ class EventHandler(AssistantEventHandler):
         self.submit_tool_outputs(tool_outputs, run_id)
 
     def submit_tool_outputs(self, tool_outputs, run_id):
-        # NameError: name 'client' is not defined <- stream.until_done()
         client = st.session_state["client"]
 
         # Use the submit_tool_outputs_stream helper
@@ -178,7 +177,11 @@ class EventHandler(AssistantEventHandler):
         file_path = "./challenge-09.result"
         with open(file_path, "w+", encoding="utf-8") as f:
             f.write(self.message)
-        st.markdown(f"research result saved at {file_path}")
+
+        st.markdown(f"✨ research result saved at {file_path}")
+        st.download_button(
+            "::: Download :::", st.session_state["result"]
+        )
 
 
 def main():
@@ -197,7 +200,6 @@ def main():
         # https://pypi.org/project/openai
         client = OpenAI(api_key=openai_api_key)
 
-        # BadRequestError: Error code: 400 - {'error': {'message': "Unknown parameter: 'tools[1].function. '.", 'type': 'invalid_request_error', 'param': 'tools[1].function. ', 'code': 'unknown_parameter'}}
         assistant = client.beta.assistants.create(
             name="Research Expert",
             instructions="You are a web research bot. Search information by query, parse web links and summarize the result.",
@@ -228,8 +230,6 @@ def main():
         with st.chat_message("human"):
             st.markdown(question)
 
-        # BadRequestError: Error code: 400 - {'error': {'message': "Invalid value: 'human'. Supported values are: 'user' and 'assistant'.", 'type': 'invalid_request_error', 'param': 'role', 'code': 'invalid_value'}}
-        # BadRequestError: Error code: 400 - {'error': {'message': "Can't add messages to thread_i2LyHXXF8dZGKOy0zTIe2Riq while a run run_cVzucEYxgiNsR9rSPmFIHBJG is active.", 'type': 'invalid_request_error', 'param': None, 'code': None}
         message = client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
