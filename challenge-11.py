@@ -224,6 +224,7 @@ if video_source:
                 summary = first_summary_chain.invoke(
                     {"text": docs[0].page_content},
                 )
+                st.write(summary)
 
                 refine_prompt = ChatPromptTemplate.from_template(
                 """
@@ -250,7 +251,6 @@ if video_source:
                             }
                         )
                         st.write(summary)
-                st.write(summary)
 
             else:
                 print(f"{transcript_path} not available!")
