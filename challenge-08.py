@@ -23,8 +23,7 @@ st.title("Research Agent")
 st.markdown(
 """
     Welcome to Research Agent!\n
-    Use this chatbot to research somthing you're curious about.\n
-    ex) Research about the XZ backdoor
+    Use this chatbot to research somthing you're curious about.
 """
 )
 st.divider()
@@ -158,7 +157,7 @@ with st.sidebar:
 
     # Github Repo Link
     st.markdown("---")
-    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-09.py"
+    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-08.py"
     badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
     st.write(f"[![Repo]({badge_link})]({github_link})")
 
