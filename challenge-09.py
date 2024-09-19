@@ -66,10 +66,11 @@ def SearchResultParseTool(params):
     return loader.load()
 
 # define function mapper
+# Object of type Document is not JSON serializable
 functions_map = {
     "wiki_search": WikipediaSearchTool,
     "ddg_search": DuckDuckGoSearchTool,
-    "link_parse": SearchResultParseTool,
+    # "link_parse": SearchResultParseTool,
 }
 
 # define function schema
@@ -108,23 +109,23 @@ functions = [
             },
         },
     },
-    {
-        "type": "function",
-        "function": {
-            "name": "link_parse",
-            "description": "Load link to parse into detail content.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "link": {
-                        "type": "string",
-                        "description": "search result's output",
-                    },
-                },
-                "required": ["link"],
-            },
-        },
-    }
+    # {
+    #     "type": "function",
+    #     "function": {
+    #         "name": "link_parse",
+    #         "description": "Load link to parse into detail content.",
+    #         "parameters": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "link": {
+    #                     "type": "string",
+    #                     "description": "search result's output",
+    #                 },
+    #             },
+    #             "required": ["link"],
+    #         },
+    #     },
+    # }
 ]
 
 
