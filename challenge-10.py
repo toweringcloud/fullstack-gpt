@@ -150,7 +150,7 @@ with st.sidebar:
 
     # Github Repo Link
     st.markdown("---")
-    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-11.py"
+    github_link="https://github.com/toweringcloud/fullstack-gpt/blob/main/challenge-10.py"
     badge_link="https://badgen.net/badge/icon/GitHub?icon=github&label"
     st.write(f"[![Repo]({badge_link})]({github_link})")
 
